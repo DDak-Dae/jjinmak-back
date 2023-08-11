@@ -32,7 +32,7 @@ def GPT(userId, query, prevMsgId, postMsgId = None):
     {history}
     Human: {input}
     AI Assistant:"""
-    print(mg.getCollectionName(userId, channelId))
+    # print(mg.getCollectionName(userId, channelId))
     prompt = PromptTemplate(
         template = promptTemplate, 
         input_variables = ["history", "input"],
@@ -54,7 +54,7 @@ def GPT(userId, query, prevMsgId, postMsgId = None):
         prompt = prompt,
         llm = llm,
         memory = memory,
-        verbose = True,
+        # verbose = True,
     )
     chainInput = {
         "input": query,

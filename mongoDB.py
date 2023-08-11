@@ -24,7 +24,7 @@ embeddings = OpenAIEmbeddings()
 #                            Login Page                               #
 #######################################################################
 def insertUser(userId, password, openaiKey):
-  print("---------- insertUser 실행 !! ----------")
+  # print("---------- insertUser 실행 !! ----------")
   #중복되는 아이디 있는지 확인
   if db.userInfo.find_one({'user_id': userId}):
     return "fail", "이미 존재하는 아이디입니다"
@@ -37,10 +37,7 @@ def insertUser(userId, password, openaiKey):
   }
   response = requests.get(url = url, headers = headers)
 
-  if response.status_code == 200:
-    print("API key is valid!")
-  else:
-    print("Invalid API key or error occurred.")
+  if response.status_code != 200:
     return "fail", "API키가 유효하지 않습니다"
   
   #db에 삽입
@@ -49,7 +46,7 @@ def insertUser(userId, password, openaiKey):
   return "success", "회원가입 성공!"
 
 def checkIdPassword(userId, password):
-  print("---------- checkIdPassword 실행 !! ----------")
+  # print("---------- checkIdPassword 실행 !! ----------")
   result = db.userInfo.find_one({"user_id" : userId, "user_pwd" : password})
 
   if result == None :
@@ -61,7 +58,7 @@ def checkIdPassword(userId, password):
 #                            Workspace Page                           #
 #######################################################################
 def checkChannelId(userId, channelId, imgPath, description = "채널 description입니다."):
-  print("---------- checkChannelId 실행 !! ----------")
+  # print("---------- checkChannelId 실행 !! ----------")
   if db.channelInfo.find_one({"user_id": userId, "channel_id": channelId}):
     return "fail", "중복된 이름입니다"
 
@@ -89,7 +86,7 @@ def getChannelList(userId):
 #                             Vector DB                               #
 #######################################################################
 def insertFileIdElemId(userId, channelId, data):
-  print("---------- insertFileIdElemId 실행 !! ----------")
+  # print("---------- insertFileIdElemId 실행 !! ----------")
   
   for i in range(len(data["file_ids"])):
     db.idInfo.insert_one({"user_id": userId, "channel_id": channelId, "file_id": data["file_ids"][i], "elem_id": []})
@@ -99,35 +96,35 @@ def insertFileIdElemId(userId, channelId, data):
   return "sucess", "파일이 디렉토리와 벡터 DB에 저장되었습니다"
 
 def getOccupiedChannelId(userId):
-  print("---------- getOccupiedChannelId 실행 !! ----------")
+  # print("---------- getOccupiedChannelId 실행 !! ----------")
   result = db.userInfo.find_one({"user_id": userId})
   return result["occupied_channel_id"]
 
 def getPrevMsgId(userId, channelId):
-  print("---------- getPrevMsgId 실행 !! ----------")
+  # print("---------- getPrevMsgId 실행 !! ----------")
   result = db.channelInfo.find_one({"user_id": userId, "channel_id": channelId})
   return result["prev_msg_id"]
 
 def getCollectionName(userId, channelId):
-  print("---------- getCollectionName 실행 !! ----------")
+  # print("---------- getCollectionName 실행 !! ----------")
   result = db.channelInfo.find_one({"user_id": userId, "channel_id": channelId})
   return result["collection_name"]
 
 def updatePrevMsgId(userId, channelId, newMsgId):
-  print("---------- updatePrevMsgId 실행 !! ----------")
+  # print("---------- updatePrevMsgId 실행 !! ----------")
   db.channelInfo.update_one({"user_id": userId, "channel_id": channelId}, {"$set": {"prev_msg_id": newMsgId}})
 
 def updateWordCloud(userId, channelId, wordCloud):
-  print("---------- updateWordCloud 실행 !! ----------")
+  # print("---------- updateWordCloud 실행 !! ----------")
   for word in wordCloud:
     db.channelInfo.update_one({"user_id": userId, "channel_id": channelId}, {"$addToSet": {"word_cloud": word}})
 
 def updateOccupiedChannel(userId, channelId):
-  print("---------- updateOccupiedChannel 실행 !! ----------")
+  # print("---------- updateOccupiedChannel 실행 !! ----------")
   db.userInfo.update_one({"user_id": userId}, {"$set": {"occupied_channel_id": channelId}})
 
 def giveMsgId(userId, question, answer, curMsgId, modifyId = None, sources = None):
-  print("---------- giveMsgId 실행 !! ----------")
+  # print("---------- giveMsgId 실행 !! ----------")
   channelId = getOccupiedChannelId(userId)
   prevMsgId = getPrevMsgId(userId, channelId)
 
@@ -163,7 +160,7 @@ def giveAllMsg(userId, channelId):
     # with open('계층구조.json', 'w', encoding = 'utf-8') as json_file:
     #   json.dump(dto, json_file, ensure_ascii = False, indent = 6)
     
-    # print(jsonData)
+    # # print(jsonData)
 
   return jsonData
 
@@ -269,7 +266,7 @@ def initialize():
 
 
 def delFileIdElemId(fileId, userId, channelId):
-  print("---------- delFileIdElemId 실행 !! ----------")
+  # print("---------- delFileIdElemId 실행 !! ----------")
 
   dbPath = f"./{userId}/db"
   vdb = Chroma(
@@ -281,14 +278,14 @@ def delFileIdElemId(fileId, userId, channelId):
   cursor = db.idInfo.find({"file_id": fileId})
   
   if cursor == None :
-    print("No file")
+    # print("No file")
     return
   
   for doc in cursor:
     vdb.delete(doc["elem_id"])
     db.idInfo.delete_one({"_id": doc["_id"]})
-    print(doc['elem_id'])
-    print(doc)
+    # print(doc['elem_id'])
+    # print(doc)
 
-  print("Delete! sucess")
+  # print("Delete! sucess")
   vdb.persist()

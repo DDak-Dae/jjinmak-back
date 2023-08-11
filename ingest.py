@@ -76,12 +76,12 @@ def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Docum
     return results
 
 def process_documents(userId, channelId, source_directory, ignored_files: List[str] = []) -> List[Document]:
-    print(f"Loading documents from {source_directory}")
+    # print(f"Loading documents from {source_directory}")
     documents = load_documents(source_directory, ignored_files)
     if not documents:
-        print("No new documents to load")
+        # print("No new documents to load")
         return None
-    print(f"Loaded {len(documents)} new documents from {source_directory}")
+    # print(f"Loaded {len(documents)} new documents from {source_directory}")
     # text_splitter = CharacterTextSplitter.from_tiktoken_encoder(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = chunk_size, chunk_overlap = chunk_overlap)
     texts = text_splitter.split_documents(documents)
@@ -91,7 +91,7 @@ def process_documents(userId, channelId, source_directory, ignored_files: List[s
     mg.updateWordCloud(userId, channelId, wordCloud)
     #####################################################################
 
-    print(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
+    # print(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
     return texts
 
 def does_vectorstore_exist(persist_directory: str) -> bool:
@@ -146,8 +146,8 @@ def make_id(texts):
             response_data["file_ids"].append(db_data["file_ids"][-1])
             
             temp_ids = [id]
-            print("file name : ", cur_name)
-            print("file id ",db_data["file_ids"][-1])
+            # print("file name : ", cur_name)
+            # print("file id ",db_data["file_ids"][-1])
             
         else : temp_ids.append(id)
         
@@ -164,7 +164,7 @@ def Ingest(userId, channelPath, channelId):
     dbPath = f"./{userId}/db"
 
     if does_vectorstore_exist(dbPath):
-        print(f"Appending to existing vectorstore at {dbPath}")
+        # print(f"Appending to existing vectorstore at {dbPath}")
         db = Chroma(
             persist_directory = dbPath, 
             embedding_function = embeddings, 
@@ -180,11 +180,11 @@ def Ingest(userId, channelPath, channelId):
         if texts == None :
             return "success", "이미 저장된 파일입니다.", None, []
 
-        print(f"Creating embeddings. May take some minutes...")
+        # print(f"Creating embeddings. May take some minutes...")
         response_data, db_data, ids = make_id(texts)
         db.add_documents(texts, ids = ids)
     else:
-        print("Creating new vectorstore")
+        # print("Creating new vectorstore")
         texts = process_documents(
             userId = userId, 
             channelId = channelId, 
@@ -194,7 +194,7 @@ def Ingest(userId, channelPath, channelId):
         if texts == None :
             return "success", "이미 저장된 파일입니다.", None, []
         
-        print(f"Creating embeddings. May take some minutes...")
+        # print(f"Creating embeddings. May take some minutes...")
         response_data, db_data, ids = make_id(texts)
         db = Chroma.from_documents(
             documents = texts, 
@@ -207,11 +207,11 @@ def Ingest(userId, channelPath, channelId):
     db.persist()
     db = None
 
-    print(f"Ingestion complete! You can now run privateGPT.py to query your documents")
+    # print(f"Ingestion complete! You can now run privateGPT.py to query your documents")
     
     sendData = []
     for i in range(len(response_data["file_names"])):
-        print(response_data["file_names"][i], response_data["file_ids"][i])
+        # print(response_data["file_names"][i], response_data["file_ids"][i])
         temp = {"fileName" : response_data["file_names"][i].split('/')[-1], "fileId" : response_data["file_ids"][i]}
         sendData.append(temp)
 
